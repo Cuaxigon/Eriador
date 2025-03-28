@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bilbo's Journey with the Ring</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Calligraffitti&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background-color: #f4e8c1; /* Parchment-like background */
+        }
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+        #timeline {
+            display: flex;
+            justify-content: space-around;
+            background-color: #8b4513; /* Brown */
+            padding: 10px;
+        }
+        .event {
+            width: 30px;
+            height: 30px;
+            background-color: #4682b4;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .event:hover {
+            background-color: #ff0000;
+        }
+        .custom-popup .leaflet-popup-content-wrapper {
+            background-color: #f4e8c1;
+            color: #4a2c0f;
+            font-family: 'Calligraffitti', cursive;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .custom-marker div {
+            background-color: #4682b4;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; font-family: 'Calligraffitti', cursive; color: #8b4513;">Bilbo's Journey with the Ring</h1>
+    <div id="map"></div>
+    <div id="timeline">
+        <div class="event" data-event-id="1">1</div>
+        <div class="event" data-event-id="2">2</div>
+        <div class="event" data-event-id="3">3</div>
+        <div class="event" data-event-id="4">4</div>
+        <div class="event" data-event-id="5">5</div>
+        <div class="event" data-event-id="6">6</div>
+        <div class="event" data-event-id="7">7</div>
+        <div class="event" data-event-id="8">8</div>
+        <div class="event" data-event-id="9">9</div>
+        <div class="event" data-event-id="10">10</div>
+        <div class="event" data-event-id="11">11</div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Locations with coordinates for a 2000x1600 map (adjust if your map size differs)
+        const locations = [
+            {id: "shire", name: "The Shire", latlng: [1200, 200]},       // Southwest
+            {id: "rivendell", name: "Rivendell", latlng: [800, 600]},    // Central-east
+            {id: "misty-mountains", name: "Misty Mountains", latlng: [1000, 800]}, // Central
+            {id: "mirkwood", name: "Mirkwood", latlng: [1400, 1000]},    // Southeast
+            {id: "elvenking-halls", name: "Elvenking’s Halls", latlng: [1440, 1040]}, // Within Mirkwood
+            {id: "lonely-mountain", name: "Lonely Mountain", latlng: [1600, 1200]} // Northeast
+        ];
+
+        // Events tied to Bilbo’s journey
+        const events = [
+            {id: "1", location: "misty-mountains", description: "In the dark tunnels beneath the Misty Mountains, I found a small, golden ring—quite by chance, or so I thought!"},
+            {id: "2", location: "misty-mountains", description: "Using the Ring’s odd magic, I vanished and slipped past that slimy Gollum. My heart raced like a rabbit’s!"},
+            {id: "3", location: "misty-mountains", description: "Still unseen, I crept through goblin halls to find my dwarf friends. A handy little trinket, this!"},
+            {id: "4", location: "mirkwood", description: "In that dreary forest, I popped on the Ring to tackle giant spiders and free the dwarves. Rather heroic, if I say so!"},
+            {id: "5", location: "elvenking-halls", description: "Hidden by the Ring, I snuck into the Elvenking’s cellars and barrelled the dwarves out. A soggy escape!"},
+            {id: "6", location: "lonely-mountain", description: "Invisible, I tiptoed into Smaug’s lair. His snores shook the gold, but the Ring kept me safe—mostly!"},
+            {id: "7", location: "lonely-mountain", description: "Amidst the battle’s din, I used the Ring to stay out of sight. Felt small, but glad to be unseen!"},
+            {id: "8", location: "rivendell", description: "Homeward bound, we rested at Rivendell. The Ring stayed in my pocket—a secret for now."},
+            {id: "9", location: "shire", description: "Back in the Shire, I used the Ring to dodge nosy neighbors. Peace and quiet, hobbit-style!"},
+            {id: "10", location: "shire", description: "At my eleventy-first birthday, I slipped on the Ring and vanished—quite the party trick!"},
+            {id: "11", location: "rivendell", description: "After giving the Ring to Frodo, I settled in Rivendell to write my tale. No more adventures for me!"}
+        ];
+
+        // Initialize Leaflet map with Simple CRS
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -1,
+            maxZoom: 2,
+        });
+
+        // Set bounds to match your map’s dimensions (e.g., 2000x1600 pixels)
+        const bounds = [[0, 0], [1600, 2000]]; // [height, width]
+
+        // Replace with your hosted image URL
+        const imageUrl = https://imgur.com/a/0JgM6AC;
+        L.imageOverlay(imageUrl, bounds).addTo(map);
+        map.fitBounds(bounds);
+
+        // Add markers
+        const markers = {};
+        locations.forEach(loc => {
+            const marker = L.marker(loc.latlng, {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div>${loc.name.charAt(0)}</div>`
+                })
+            }).addTo(map);
+            marker.bindPopup("", {className: 'custom-popup'});
+            markers[loc.id] = marker;
+        });
+
+        // Timeline interactions
+        const timelineEvents = document.querySelectorAll('.event');
+        timelineEvents.forEach(el => {
+            el.addEventListener('mouseover', () => {
+                const eventId = el.getAttribute('data-event-id');
+                const event = events.find(e => e.id === eventId);
+                if (event) {
+                    const marker = markers[event.location];
+                    if (marker) {
+                        marker.getPopup().setContent(event.description);
+                        marker.openPopup();
+                        map.panTo(marker.getLatLng());
+                    }
+                }
+            });
+            el.addEventListener('mouseout', () => {
+                const eventId = el.getAttribute('data-event-id');
+                const event = events.find(e => e.id === eventId);
+                if (event) {
+                    const marker = markers[event.location];
+                    if (marker) {
+                        marker.closePopup();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bilbo's Journey with the Ring</title>
+  <!-- Load p5.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+  <!-- Load a handwritten font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Caveat&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4e8c1; /* Parchment-like background */
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #8b4513; /* Brown ink */
+      padding: 20px 0;
+    }
+    #map-container {
+      position: relative;
+      width: 800px;
+      margin: 20px auto;
+    }
+    #popup {
+      position: absolute;
+      background-color: #f9f5e7; /* Light parchment */
+      padding: 15px;
+      border: 2px solid #8b4513; /* Brown border */
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: #4a2c0f; /* Dark brown text */
+      max-width: 300px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+      z-index: 10;
+      display: none;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bilbo's Journey with the Ring</h1>
+  <div id="map-container">
+    <div id="popup"></div>
+  </div>
+  <script>
+    // Define key locations on the map
+    const locations = [
+      { name: 'Shire', x: 100, y: 300 },
+      { name: 'Rivendell', x: 300, y: 200 },
+      { name: 'Misty Mountains', x: 400, y: 300 },
+      { name: 'Mirkwood', x: 500, y: 250 },
+      { name: 'Elvenking’s Halls', x: 520, y: 260 },
+      { name: 'Lonely Mountain', x: 700, y: 200 },
+    ];
+
+    // Define events related to the Ring with coordinates and descriptions
+    const events = [
+      { x: 400, y: 300, desc: "In the dark tunnels beneath the Misty Mountains, I found a small, golden ring. It was cold to the touch, and I pocketed it without much thought—what a fateful moment that turned out to be!" },
+      { x: 405, y: 305, desc: "Using the Ring’s strange power to vanish, I slipped past that wretched Gollum and out of his damp cave. My heart was pounding louder than a dragon’s roar!" },
+      { x: 410, y: 310, desc: "Still unseen thanks to my little treasure, I crept through the goblin-infested halls and found my dwarf friends again. Quite a useful trinket, this ring!" },
+      { x: 500, y: 250, desc: "In that gloomy forest, I popped on the Ring and tackled those monstrous spiders, cutting their webs to free the dwarves. Invisible, but very much present!" },
+      { x: 520, y: 260, desc: "With the Ring hiding me from elvish eyes, I snuck into the Elvenking’s dungeons and packed the dwarves into barrels. A wet escape, but a clever one!" },
+      { x: 700, y: 200, desc: "Invisible once more, I tiptoed into the dragon’s lair to spy on Smaug. His fiery breath was close, but the Ring kept me safe—well, mostly!" },
+      { x: 710, y: 205, desc: "Amidst the clash of armies, I used the Ring to stay out of sight. Watched the chaos unfold, feeling rather small but glad to be unseen!" },
+      { x: 305, y: 205, desc: "On our way home, we rested at Rivendell with the elves. The Ring stayed tucked away in my pocket, a secret I wasn’t ready to share." },
+      { x: 100, y: 300, desc: "Back in the Shire, I settled into a quiet life, using the Ring now and then to dodge nosy Sackville-Bagginses. A handy trick for a hobbit who likes his peace!" },
+      { x: 105, y: 305, desc: "At my grand eleventy-first birthday, I slipped on the Ring and vanished during my speech—quite the exit! Left the Shire buzzing and grinning to myself." },
+      { x: 305, y: 210, desc: "After passing the Ring to young Frodo, I set off for Rivendell, where I’ve settled to write my book and enjoy some well-earned rest. No more vanishing acts for me!" }
+    ];
+
+    let hoveredIndex = -1; // Track which marker is being hovered over
+    const popup = document.getElementById('popup'); // Reference to the popup div
+
+    // p5.js setup function
+    function setup() {
+      const canvas = createCanvas(800, 600);
+      canvas.parent('map-container'); // Place canvas inside the container
+    }
+
+    // p5.js draw function, runs continuously
+    function draw() {
+      background(240, 230, 200); // Light parchment color for the map
+
+      // Draw key locations
+      fill(0); // Black fill for text and circles
+      textAlign(CENTER);
+      textSize(12);
+      locations.forEach(loc => {
+        ellipse(loc.x, loc.y, 10, 10); // Small circle for each location
+        text(loc.name, loc.x, loc.y - 15); // Label above the circle
+      });
+
+      // Draw the journey route
+      stroke(0); // Black line
+      strokeWeight(2);
+      noFill();
+      beginShape();
+      vertex(locations[0].x, locations[0].y); // Shire
+      vertex(locations[1].x, locations[1].y); // Rivendell
+      vertex(locations[2].x, locations[2].y); // Misty Mountains
+      vertex(locations[3].x, locations[3].y); // Mirkwood
+      vertex(locations[4].x, locations[4].y); // Elvenking’s Halls
+      vertex(locations[5].x, locations[5].y); // Lonely Mountain
+      vertex(locations[3].x, locations[3].y); // Mirkwood (return)
+      vertex(locations[1].x, locations[1].y); // Rivendell (return)
+      vertex(locations[0].x, locations[0].y); // Shire (return)
+      endShape();
+
+      // Draw event markers
+      noStroke();
+      events.forEach((event, index) => {
+        if (index === hoveredIndex) {
+          fill(255, 255, 0); // Yellow for hovered marker
+          ellipse(event.x, event.y, 12, 12); // Larger circle
+        } else {
+          fill(255, 0, 0); // Red for normal marker
+          ellipse(event.x, event.y, 8, 8); // Smaller circle
+        }
+      });
+    }
+
+    // p5.js mouseMoved function, triggered on mouse movement
+    function mouseMoved() {
+      let newHoveredIndex = -1;
+      events.forEach((event, index) => {
+        const d = dist(mouseX, mouseY, event.x, event.y);
+        if (d < 10) { // Check if mouse is within 10 pixels of a marker
+          newHoveredIndex = index;
+        }
+      });
+      // Update popup only if the hovered marker changes
+      if (newHoveredIndex !== hoveredIndex) {
+        hoveredIndex = newHoveredIndex;
+        if (hoveredIndex !== -1) {
+          popup.innerHTML = events[hoveredIndex].desc;
+          const canvasRect = document.querySelector('canvas').getBoundingClientRect();
+          popup.style.left = `${canvasRect.left + mouseX}px`;
+          popup.style.top = `${canvasRect.top + mouseY + 20}px`;
+          popup.style.display = 'block';
+        } else {
+          popup.style.display = 'none';
+        }
+      }
+    }
+  </script>
+</body>
+</html>
